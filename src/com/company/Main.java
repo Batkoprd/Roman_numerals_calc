@@ -162,8 +162,8 @@ public class Main {
                     calc_is_running = false;
                 }
                 if (both_roman) {
-                    if (result < 0) {
-                        System.out.println("РИМСКОЕ ЧИСЛО НЕ МОЖЕТ БЫТЬ ОТРИЦАТЕЛЬНЫМ!");
+                    if (result < 1) {
+                        System.out.println("РИМСКОЕ ЧИСЛО НЕ МОЖЕТ БЫТЬ МЕНЬШЕ ЕДИНИЦЫ ИЛИ ОТРИЦАТЕЛЬНЫМ!");
                         calc_is_running = false;
                     } else if (result > 3999) {
                         System.out.println("РИМСКОЕ ЧИСЛО НЕ МОЖЕТ БЫТЬ БОЛЬШЕ 3999!");
