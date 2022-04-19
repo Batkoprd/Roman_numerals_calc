@@ -36,6 +36,7 @@ a + b, a - b, a * b, a / b. Данные передаются в одну стр
 если результат работы меньше единицы, выбрасывается исключение
 */
 
+import java.util.Locale;
 import java.util.Scanner;
 import java.util.stream.IntStream;
 
@@ -53,21 +54,21 @@ public class Main {
 
         Scanner scanner = new Scanner(System.in);
         System.out.println("Введите выражение вида \"x + y\": ");
-        String user_input = scanner.nextLine();
+        String user_input = scanner.nextLine().toUpperCase();
         myCalc(user_input);
 
         System.out.println();
 
         scanner.close();
 
-        String[] test_list = {"XX + CM", "ZXC + zxC", "X * V", "100 + 200",
-                "90-10", "1 - 1000", "X - D", "10+ D", "X+1", "MMMCD + DCC"};
-
-        IntStream.range(0, test_list.length).forEach(i -> {
-            System.out.println(test_list[i]);
-            myCalc(test_list[i]);
-            System.out.println();
-        });
+//        String[] test_list = {"XX + CM", "ZXC + zxC", "X * V", "100 + 200",
+//                "90-10", "1 - 1000", "X - D", "10+ D", "X+1", "MMMCD + DCC"};
+//
+//        IntStream.range(0, test_list.length).forEach(i -> {
+//            System.out.println(test_list[i]);
+//            myCalc(test_list[i]);
+//            System.out.println();
+//        });
 
     }
 
