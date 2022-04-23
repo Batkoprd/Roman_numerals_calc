@@ -35,9 +35,6 @@ a + b, a - b, a * b, a / b. Данные передаются в одну стр
 Результатом работы калькулятора с римскими числами могут быть только положительные числа,
 если результат работы меньше единицы, выбрасывается исключение
 */
-
-import org.jetbrains.annotations.NotNull;
-
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -128,7 +125,7 @@ public class Main {
         return inputNum.equals(arabicToRoman(romanToArabic(inputNum)));
     }
 
-    public static String readInput(@NotNull String user_input) {
+    public static String readInput(String user_input) {
 
         int index_of_operation = 0;
         List<Character> user_input_as_list = user_input.chars().mapToObj(c -> (char) c).collect(Collectors.toList());
