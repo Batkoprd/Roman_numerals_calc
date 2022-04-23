@@ -36,8 +36,10 @@ a + b, a - b, a * b, a / b. Данные передаются в одну стр
 если результат работы меньше единицы, выбрасывается исключение
 */
 
-import java.util.Locale;
-import java.util.Scanner;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Main {
@@ -46,30 +48,36 @@ public class Main {
     private static final int[] ARABIC = {1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
     //специально такая проверка римских, чтобы isValidRoman имел смысл
     public static final String regex_roman_input =  "([MDCLXVI]+)\s([+*/\\-])\s([MDCLXVI]+)";
-    public static final String regex_arabic_input = "(\\d+)\s([+*/\\-])\s(\\d+)";
-    public static final String regex_input = "([MDCLXVI]+)\s([+*/\\-])\s([MDCLXVI]+)|(\\d+)\s([+*/\\-])\s(\\d+)";
+    public static final String regex_arabic_input = "(-?\\d+)\s([+*/\\-])\s(-?\\d+)";
+    public static final String[] operators = {"+", "*", "-", "/"};
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws UserInputException {
 
         Scanner scanner = new Scanner(System.in);
         System.out.println("Введите выражение вида \"x + y\": ");
-        String user_input = scanner.nextLine().toUpperCase();
+
+        String user_input = readInput(scanner.nextLine().toUpperCase());
+
         myCalc(user_input);
 
         System.out.println();
 
         scanner.close();
 
-//        String[] test_list = {"XX + CM", "ZXC + zxC", "X * V", "100 + 200",
-//                "90-10", "1 - 1000", "X - D", "10+ D", "X+1", "MMMCD + DCC"};
-//
-//        IntStream.range(0, test_list.length).forEach(i -> {
-//            System.out.println(test_list[i]);
-//            myCalc(test_list[i]);
-//            System.out.println();
-//        });
+    }
 
+    public static String[] test(){
+        Random random = new Random();
+        String[] test_array = new String[3000];
+
+        for (int i = 0; i < test_array.length; i++){
+            test_array[i] = arabicToRoman(Integer.toString(random.nextInt(1, 100))) + " "
+                    + operators[random.nextInt(0, operators.length -1)] +
+                    " " + arabicToRoman(Integer.toString(random.nextInt(1, 100)));
+        }
+
+        return test_array;
     }
 
     public static String arabicToRoman(String inputNum) {
@@ -120,59 +128,90 @@ public class Main {
         return inputNum.equals(arabicToRoman(romanToArabic(inputNum)));
     }
 
+    public static String readInput(@NotNull String user_input) {
 
-    public static void myCalc (String user_input) {
+        int index_of_operation = 0;
+        List<Character> user_input_as_list = user_input.chars().mapToObj(c -> (char) c).collect(Collectors.toList());
+
+        // удаляем все пробелы из ввода
+        for (int i = 0; i < user_input_as_list.size(); i++){
+            while (user_input_as_list.get(i).equals(' ')) user_input_as_list.remove(i);
+        }
+        // ищем индекс оператора
+        for (int i = 0; i < user_input_as_list.size(); i++){
+            //прерываем цикл, когда находим + * / потому что первое число может быть отрицательным -n
+            if (user_input_as_list.get(i).equals('+') || user_input_as_list.get(i).equals('*')
+                    || user_input_as_list.get(i).equals('/')) {
+                index_of_operation = i;
+                break;
+                // прерываем цикл, когда находим -, потому что и второе число может быть отрицательным
+            } else if ( i != 0 && user_input_as_list.get(i).equals('-')) {
+                index_of_operation = i;
+                break;
+            }
+        }
+
+        // окружаем оператор пробелами
+        user_input_as_list.add(index_of_operation, ' ');
+        user_input_as_list.add(index_of_operation + 2, ' ');
+
+        // превращаем список в строку
+        String correctInput = user_input_as_list.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining());
+
+        return correctInput;
+    }
+
+
+    public static void myCalc (String user_input) throws UserInputException {
         boolean calc_is_running = true;
         int x = 0;
         int y = 0;
         int result = 0;
 
-        while (calc_is_running) {
+        String num1 = user_input.substring(0, user_input.indexOf(" ")).toUpperCase();
+        String num2 = user_input.substring(user_input.lastIndexOf(" ") + 1).toUpperCase();
+        String operation = user_input.substring(user_input.indexOf(" ") + 1, user_input.lastIndexOf(" "));
+        boolean both_roman = user_input.matches(regex_roman_input) && (isValidRoman(num1) && isValidRoman(num2));
+        boolean both_arabic = user_input.matches(regex_arabic_input);
 
-            if (!user_input.matches(regex_input)) {
-                System.out.println("НЕВЕРНЫЙ ВВОД!!!");
-                calc_is_running = false;
+//        System.out.println("num1:  " + num1);
+//        System.out.println("operation:  " + operation);
+//        System.out.println("num2:  " + num2);
+
+        if (both_arabic) {
+            x = Integer.parseInt(num1);
+            y = Integer.parseInt(num2);
+        } else if (both_roman) {
+            x = Integer.parseInt(romanToArabic(num1));
+            y = Integer.parseInt(romanToArabic(num2));
+        }
+        else {
+            throw new UserInputException("Неверный ввод, калькулятрор работает " +
+                    "только с римскими или только с арабскими числами.");
+
+        }
+
+        switch (operation) {
+            case "+" -> result = x + y;
+            case "-" -> result = x - y;
+            case "*" -> result = y * x;
+            case "/" -> result = x / y;
+        }
+
+        if (both_arabic) {
+            System.out.println(user_input + " = " + result);
+            calc_is_running = false;
+        }
+        if (both_roman) {
+            if (result < 1) {
+                throw new UserInputException("РИМСКОЕ ЧИСЛО НЕ МОЖЕТ БЫТЬ МЕНЬШЕ ЕДИНИЦЫ ИЛИ ОТРИЦАТЕЛЬНЫМ!");
+            } else if (result > 3999) {
+                throw new UserInputException("РИМСКОЕ ЧИСЛО НЕ МОЖЕТ БЫТЬ БОЛЬШЕ 3999!");
             } else {
-                String num1 = user_input.substring(0, user_input.indexOf(" ")).toUpperCase();
-                String num2 = user_input.substring(user_input.lastIndexOf(" ") + 1).toUpperCase();
-                String operation = user_input.substring(user_input.indexOf(" ") + 1, user_input.lastIndexOf(" "));
-                boolean both_roman = user_input.matches(regex_roman_input) && (isValidRoman(num1) && isValidRoman(num2));
-                boolean both_arabic = user_input.matches(regex_arabic_input);
-
-                if (both_arabic) {
-                    x = Integer.parseInt(num1);
-                    y = Integer.parseInt(num2);
-                } else if (both_roman) {
-                    x = Integer.parseInt(romanToArabic(num1));
-                    y = Integer.parseInt(romanToArabic(num2));
-                } else {
-                    System.out.println("НЕВЕРНЫЙ ВВОД!!!");
-                    calc_is_running = false;
-                }
-
-                switch (operation) {
-                    case "+" -> result = x + y;
-                    case "-" -> result = x - y;
-                    case "*" -> result = y * x;
-                    case "/" -> result = x / y;
-                }
-
-                if (both_arabic) {
-                    System.out.println(user_input + " = " + result);
-                    calc_is_running = false;
-                }
-                if (both_roman) {
-                    if (result < 1) {
-                        System.out.println("РИМСКОЕ ЧИСЛО НЕ МОЖЕТ БЫТЬ МЕНЬШЕ ЕДИНИЦЫ ИЛИ ОТРИЦАТЕЛЬНЫМ!");
-                        calc_is_running = false;
-                    } else if (result > 3999) {
-                        System.out.println("РИМСКОЕ ЧИСЛО НЕ МОЖЕТ БЫТЬ БОЛЬШЕ 3999!");
-                        calc_is_running = false;
-                    } else {
-                        System.out.println(user_input + " = " + arabicToRoman(Integer.toString(result)));
-                        calc_is_running = false;
-                    }
-                }
+                System.out.println(user_input + " = " + arabicToRoman(Integer.toString(result)));
+                calc_is_running = false;
             }
         }
     }
