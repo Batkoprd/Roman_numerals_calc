@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Kata - calculator.iml" filepath="$PROJECT_DIR$/Kata - calculator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Roman numerals calc.iml" filepath="$PROJECT_DIR$/Roman numerals calc.iml" />
     </modules>
   </component>
 </project>
