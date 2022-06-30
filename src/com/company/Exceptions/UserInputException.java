@@ -1,6 +1,6 @@
-package com.company;
+package com.company.Exceptions;
 
-public class UserInputException extends Exception {
+public class UserInputException extends IllegalArgumentException {
     public UserInputException() {
     }
     public UserInputException(String message) {
@@ -15,8 +15,6 @@ public class UserInputException extends Exception {
         super(cause);
     }
 
-    public UserInputException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
+
 
 }
