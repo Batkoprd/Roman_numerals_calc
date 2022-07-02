@@ -9,8 +9,11 @@ import java.util.*;
 
 public class Calc {
 
-    private static final String[] ROMAN = {"M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"};
-    private static final int[] ARABIC = {1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
+    private static final String[] ROMAN =     {"MMM", "MM", "M", "CM", "DCCC", "DCC", "DC", "D", "CD", "CCC", "CC", "C",
+            "XC", "LXXX", "LXX", "LX", "L", "XL", "XXX", "XX", "X", "IX",
+            "VIII", "VII", "VI", "V", "IV", "III", "II", "I"};
+    private static final int[] ARABIC = {3000, 2000, 1000, 900, 800, 700, 600, 500, 400, 300, 200, 100, 90, 80, 70, 60,
+            50, 40, 30, 20, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
     public static final String REGEX_ROMAN =  "[MDCLXVI]+";
     public static final String REGEX_ARABIC = "-?\\d+";
     public static final String REGEX_OPERATION = "[+*/\\-]";
@@ -40,34 +43,32 @@ public class Calc {
 
     public static String[] test() throws RomanNumberOutOfRangeException {
         Random random = new Random();
-        String[] test_array = new String[3000];
+        String[] testArray = new String[3000];
 
-        for (int i = 0; i < test_array.length; i++){
-            test_array[i] = arabicToRoman(Integer.toString(random.nextInt(1, 100))) + " "
+        for (int i = 0; i < testArray.length; i++){
+            testArray[i] = arabicToRoman(Integer.toString(random.nextInt(1, 100))) + " "
                     + OPERATORS[random.nextInt(0, OPERATORS.length -1)] +
                     " " + arabicToRoman(Integer.toString(random.nextInt(1, 100)));
         }
-        return test_array;
+        return testArray;
     }
 
     public static String arabicToRoman(String inputNum) throws RomanNumberOutOfRangeException {
 
         int intInputNum = Integer.parseInt(inputNum);
-        StringBuilder num_in_roman = new StringBuilder();
+        StringBuilder numInRoman = new StringBuilder();
         int size = ROMAN.length;
 
-        if (intInputNum >= 100 || intInputNum < 1) {
+        if (intInputNum > 100 || intInputNum < 1) {
             throw new RomanNumberOutOfRangeException("Калькулятор не принимает на вход римские числа меньше 1 и больше 100.");
         } else {
             for (int i = 0; i < size; i++) {
-                int exp = intInputNum / ARABIC[i]; // получаем количество тысяч/сотен/десятков
-                intInputNum -= ARABIC[i] * (intInputNum / ARABIC[i]); // уменьшаем вводимое число
-                while (exp != 0) {
-                    num_in_roman.append(ROMAN[i]); // добавляем в строку тысячи/сотни/десятки
-                    exp--; // уменьшаем кол-во тысяч/сотен/десятков до 0, пока все не добавятся в строку
+                if (intInputNum >= ARABIC[i]) {
+                    numInRoman.append(ROMAN[i]);
+                    intInputNum -= ARABIC[i];
                 }
             }
-            return num_in_roman.toString();
+            return numInRoman.toString();
         }
     }
 
@@ -100,8 +101,13 @@ public class Calc {
         }
     }
 
-    public static String readInput(String userInput) {
+    public static String readInput(String userInput) throws UserInputException{
         userInput= userInput.replaceFirst("^(-?\\w+)\\s*((?:(?!-\\b)[/*+-])*)\\s*(-?\\w+)$", "$1 $2 $3");
+
+        if (userInput.chars().filter(ch -> ch == ' ').count() != 2) {
+            throw new UserInputException("Калькулятор принимает только два операнда.");
+        }
+
         return userInput;
     }
 
@@ -138,6 +144,10 @@ public class Calc {
                 throw new UserInputException("Некорректный " +
                         "ввод, калькулятор принимает на вход либо два римских числа, либо два арабских");
             }
+        }
+
+        if (x < 1 || x > 10 || y < 1 || y > 10) {
+            throw new UserInputException("Калькулятор работает только с числами от 1 до 10.");
         }
 
         switch (operation) {
